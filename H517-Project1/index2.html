@@ -1,0 +1,454 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>517Visualization</title>
+  <!--<script src="http://d3js.org/d3.v4.min.js"></script>-->
+  <script type="text/javascript" src="../d3/d3.js"></script>
+
+</head>
+
+<style>
+body { font: 12px Arial;}
+
+path { 
+  stroke: black;
+	stroke-width: 3;
+	fill: none;
+}
+
+.axis path,
+.axis line {
+	fill: none;
+	stroke: grey;
+	stroke-width: 2;
+	shape-rendering: crispEdges;
+}
+
+.overlay {
+  fill: none;
+  pointer-events: all;
+}
+
+.focus circle {
+  fill: none;
+  stroke: steelblue;
+}
+
+
+</style>
+
+
+<body>
+
+<button id="zoom_in">+</button>
+<button id="zoom_out">-</button>
+
+<div id="option">
+    <input name="GenderButton" 
+           type="button" 
+           value="Show by gender" 
+           onclick="updateGender()" />
+
+      <input name="AgeButton" 
+           type="button" 
+           value="Show by age" 
+           onclick="updateAge()" />
+</div>
+  
+  <script type="text/javascript">
+
+    var width  = 600;
+    var height = 580;
+    var w = 100
+    var h = 200
+    var i;
+    var barPadding = 1;
+
+  
+ 
+
+
+    var zoom = d3.behavior.zoom()
+    .scaleExtent([1, 10])
+    .on("zoom", zoomed);
+
+	var drag = d3.behavior.drag()
+    .origin(function(d) { return d; })
+    .on("dragstart", dragstarted)
+    .on("drag", dragged)
+    .on("dragend", dragended);
+
+  var	margin = {top: 30, right: 20, bottom: 30, left: 50},
+	w1 = 400 - margin.left - margin.right,
+	h1 = 220 - margin.top - margin.bottom;
+
+var zoom = d3.behavior.zoom().scaleExtent([1, 8]).on("zoom", zoomed);
+
+  var svgContainer = d3.select("body")
+    	.append("svg")
+    	//.attr("width", width + margin.left + margin.right)
+    //.attr("height", height + margin.top + margin.bottom)
+    .attr("height", height)
+    .attr("width", width)
+    .call(zoom)
+    .append("g");
+ // .append("g")
+  //  .attr("transform", "translate(" + margin.left + "," + margin.right + ")")
+    	
+
+ 
+
+// Parse the date / time
+var	parseDate = d3.time.format("%d-%b").parse,
+	bisectDate = d3.bisector(function(d) { return d.date; }).left,
+	formatValue = d3.format(",.2f"),
+    formatCurrency = function(d) { return "$" + formatValue(d); };
+// Set the ranges
+var	x = d3.time.scale().range([0, w1]);
+var	y = d3.scale.linear().range([h1, 0]);
+
+// Define the axes
+var	xAxis = d3.svg.axis().scale(x)
+	.orient("bottom").ticks(5);
+
+var	yAxis = d3.svg.axis().scale(y)
+	.orient("left").ticks(5);
+
+// Define the line
+var	valueline = d3.svg.line()
+	.x(function(d) { return x(d.date); })
+	.y(function(d) { return y(d.death); });
+    
+// Adds the svg canvas
+var	chart1 = d3.select("body")
+	.append("svg")
+		.attr("width", w1 + margin.left + margin.right)
+		.attr("height", h1 + margin.top + margin.bottom)
+	.append("g")
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+
+
+
+
+
+	d3.select("body").append("p").text("New paragraph!");
+
+var container = svgContainer.append("g");
+
+function zoomed() {
+  container.attr("transform", "translate(" + d3.event.translate + ")scale(" + d3.event.scale + ")");
+}
+
+function dragstarted(d) {
+  d3.event.sourceEvent.stopPropagation();
+  d3.select(this).classed("dragging", true);
+}
+
+function dragged(d) {
+  d3.select(this).attr("cx", d.x = d3.event.x).attr("cy", d.y = d3.event.y);
+}
+
+function dragended(d) {
+  d3.select(this).classed("dragging", false);
+}
+          
+ //Draw the map
+    d3.csv("streets.txt", function(data) {
+                
+                //var datasets=dataset.split(" ");
+    	//console.log(typeof(data[1].xy));
+                
+
+		for (i=0; i<data.length; i++){
+          
+			var dataset=data[i].xy.split(/\s+/);
+                     
+                    
+			function isInteger(obj) {
+				return obj%1 === 0
+			}
+
+			if(isInteger(dataset[0]))
+			{
+                      
+
+				var sdata = Array.apply(1,{length: dataset[1]}).map(function(item,j=1){
+				j++;
+				//if (data[i+j].xy.split(/\s+/)[0]>20){console.log(data[i+j].xy.split(/\s+/)[0]);}
+
+				return {x: data[i+j].xy.split(/\s+/)[0]*30, y: data[i+j].xy.split(/\s+/)[1]*30}
+			});
+
+                         //console.log(sdata);
+
+			var lineFunction=d3.svg.line()
+				.x(function(d) { return d.x; })
+				.y(function(d) { return height - d.y; })
+				.interpolate("linear");
+
+
+			lineFunction(sdata);
+
+			var svgPath = svgContainer
+				.append("path")
+				.attr("stroke", "black")
+				.attr("stroke-width", "4px")
+				.attr("fill", "none");
+
+				
+
+			svgPath.attr("d", lineFunction(sdata));
+                      
+			}
+
+   		}
+                
+
+	});
+
+
+//Draw pumps
+	d3.csv("pumps.txt", function(data) {
+                
+                //var datasets=dataset.split(" ");
+    	//console.log(typeof(data[1].xy));
+                
+                     
+     
+
+				var sdata = Array.apply(1,{length: 13}).map(function(item,j=1){
+				j++;
+
+				return {x: data[j-1].xy.split(/\s+/)[0]*30, y: data[j-1].xy.split(/\s+/)[1]*30}
+			});
+
+                         //console.log(sdata);
+
+			/*svgContainer.selectAll("circle")
+  				.data(sdata)
+  				.enter().append("circle")
+   				.attr("cx", function(d) { return d.x; })
+    			.attr("cy", function(d) { return height-d.y; })
+    			.attr("r", 8)
+   				.style("fill", "blue") */ 
+
+   			svgContainer.selectAll("rect")
+  				.data(sdata)
+  				.enter().append("rect")
+   				.attr("x", function(d) { return d.x; })
+    			.attr("y", function(d) { return height-d.y; })
+    			.attr("width", 15)
+    			.attr("height",15)
+   				.style("fill", "gray")  
+
+   	
+                
+
+	});
+
+	//Add deaths
+	d3.csv("deaths.age.mf.txt", function(data) {
+                         
+                     
+     
+
+				var sdata = Array.apply(1,{length: data.length}).map(function(item,j=1){
+				j++;
+
+				return {x: data[j-1].deaths.split(/\s+/)[0]*30, y: data[j-1].deaths.split(/\s+/)[1]*30, age:data[j-1].deaths.split(/\s+/)[2], mf:data[j-1].deaths.split(/\s+/)[3] }
+			});
+
+                         console.log(sdata);
+
+            var color = d3.scale.category20b();
+
+			svgContainer.selectAll("circle")
+				.attr("id","death1")
+  				.data(sdata)
+  				.enter().append("circle")
+   				.attr("cx", function(d) { return d.x; })
+    			.attr("cy", function(d) { return height-d.y; })
+    			.attr("r", 8)
+   				.style("fill", "gray")
+    
+                      
+			
+   		
+                
+
+	});
+
+	function updateAge(){
+		d3.selectAll("circle").remove();
+			d3.csv("deaths.age.mf.txt", function(data) {
+                         
+                     
+     
+
+				var sdata = Array.apply(1,{length: data.length}).map(function(item,j=1){
+				j++;
+
+				return {x: data[j-1].deaths.split(/\s+/)[0]*30, y: data[j-1].deaths.split(/\s+/)[1]*30, age:data[j-1].deaths.split(/\s+/)[2], mf:data[j-1].deaths.split(/\s+/)[3] }
+			});
+
+                         //console.log(sdata);
+
+            var color = d3.scale.category20b();
+
+			svgContainer.selectAll("circle")
+  				.data(sdata)
+  				.enter().append("circle")
+   				.attr("cx", function(d) { return d.x; })
+    			.attr("cy", function(d) { return height-d.y; })
+    			.attr("r", 8)
+   				.style("fill", function(d) { return color(d.age); })
+   		});
+
+	}
+
+	function updateGender(){
+			d3.selectAll("circle").remove();
+			d3.csv("deaths.age.mf.txt", function(data) {
+                         
+                     
+     
+
+				var sdata = Array.apply(1,{length: data.length}).map(function(item,j=1){
+				j++;
+
+				return {x: data[j-1].deaths.split(/\s+/)[0]*30, y: data[j-1].deaths.split(/\s+/)[1]*30, age:data[j-1].deaths.split(/\s+/)[2], mf:data[j-1].deaths.split(/\s+/)[3] }
+			});
+
+                       
+
+            var color = d3.scale.category20b();
+
+			svgContainer.selectAll("circle")
+  				.data(sdata)
+  				.enter().append("circle")
+   				.attr("cx", function(d) { return d.x; })
+    			.attr("cy", function(d) { return height-d.y; })
+    			.attr("r", 8)
+   				.style("fill", function(d) { return color(d.mf); })
+   		});
+
+	}
+
+
+	//Draw timeline
+
+	d3.csv("deathdays.txt",function(data){
+
+	
+          
+
+                     
+     
+
+				var sdata = Array.apply(1,{length: data.length}).map(function(item,j=1){
+				j++;
+
+				return {date: data[j-1].xy.split(/\s+/)[0], death: data[j-1].xy.split(/\s+/)[1]}
+			});
+
+                         
+
+             sdata.forEach(function(d) {
+				d.date = parseDate(d.date);
+				d.death = +d.death;
+				});
+
+
+
+			//console.log(sdata);
+
+             
+
+	// Scale the range of the data
+	x.domain(d3.extent(sdata, function(d) { return d.date; }));
+	y.domain([0, d3.max(sdata, function(d) { return d.death; })]);
+
+	// Add the valueline path.
+	chart1.append("path")
+		.attr("class", "line")
+		.attr("d", valueline(sdata));
+
+	// Add the X Axis
+	chart1.append("g")
+		.attr("class", "x axis")
+		.attr("transform", "translate(0," + h1 + ")")
+		.call(xAxis);
+
+	// Add the Y Axis
+	chart1.append("g")
+		.attr("class", "y axis")
+		.call(yAxis)
+		.append("text")
+		.text("Deaths");
+
+
+
+
+});
+
+
+function zoomed() {
+    svgContainer.attr("transform",
+        "translate(" + zoom.translate() + ")" +
+        "scale(" + zoom.scale() + ")"
+    );
+}
+
+function interpolateZoom (translate, scale) {
+    var self = this;
+    return d3.transition().duration(350).tween("zoom", function () {
+        var iTranslate = d3.interpolate(zoom.translate(), translate),
+            iScale = d3.interpolate(zoom.scale(), scale);
+        return function (t) {
+            zoom
+                .scale(iScale(t))
+                .translate(iTranslate(t));
+            zoomed();
+        };
+    });
+}
+
+function zoomClick() {
+    var clicked = d3.event.target,
+        direction = 1,
+        factor = 0.2,
+        target_zoom = 1,
+        center = [width / 2, height / 2],
+        extent = zoom.scaleExtent(),
+        translate = zoom.translate(),
+        translate0 = [],
+        l = [],
+        view = {x: translate[0], y: translate[1], k: zoom.scale()};
+
+    d3.event.preventDefault();
+    direction = (this.id === 'zoom_in') ? 1 : -1;
+    target_zoom = zoom.scale() * (1 + factor * direction);
+
+    if (target_zoom < extent[0] || target_zoom > extent[1]) { return false; }
+
+    translate0 = [(center[0] - view.x) / view.k, (center[1] - view.y) / view.k];
+    view.k = target_zoom;
+    l = [translate0[0] * view.k + view.x, translate0[1] * view.k + view.y];
+
+    view.x += center[0] - l[0];
+    view.y += center[1] - l[1];
+
+    interpolateZoom([view.x, view.y], view.k);
+}
+
+d3.selectAll('button').on('click', zoomClick);
+
+
+	//Draw the timeline graph
+
+
+        </script>
+    </body>
+</html>
