@@ -16,7 +16,7 @@
 </head>
 
 <style>
-body { font: 11px Arial;}
+body { font: 8px Arial;}
 
 path { 
   
@@ -85,7 +85,7 @@ div.tooltip {
 
 
 
-
+<section>
 <div id="option">
     <input name="GenderButton" 
            type="button" 
@@ -102,11 +102,14 @@ div.tooltip {
 	<button id="zoom_in">+</button>
 	<button id="zoom_out">-</button>
 </div>
+
+
+<table><tr><th>
   
   <script type="text/javascript">
 
     var width  = 550;
-    var height = 580;
+    var height = 565;
     var w = 100;
     var h = 100;
     var i;
@@ -149,7 +152,7 @@ var zoom = d3.behavior.zoom().scaleExtent([1, 10]).on("zoom", zoomed);
     .append("g")
  // .append("g")
   //.attr("transform", "translate(" + margin.left + "," + margin.right + ")");
-  .attr("transform", "translate(-80,0)");
+    //.attr("transform", "translate(-80,0)");
     	
 
  
@@ -177,10 +180,12 @@ var	valueline = d3.svg.line()
 // Adds the svg canvas
 var	chart1 = d3.select("body")
 	.append("svg")
-		.attr("width", w1 + margin.left - margin.right)
-		.attr("height", 2.125*h1 + margin.top + margin.bottom)
+		.attr("width", w1 + margin.left + margin.right)
+		.attr("height", 2.21*h1 + margin.top + margin.bottom)
 	.append("g")
-		.attr("transform", "translate(25,10)");
+		.attr("transform", "translate(" + margin.left + "," + margin.top + ")")
+    //.append("text")
+    //.text("Number of deaths per day");
 
 
 var x1 = d3.scale.ordinal()
@@ -206,7 +211,7 @@ var chart2 = d3.select("body").append("svg")
 
 
 
-	d3.select("body").append("p").text("...        Wrote by Ke Zhuang © 2017 Fall");
+	d3.select("body").append("p").text("1        Wrote by Ke Zhuang © 2017 Fall, Data Resource: http://vis.ninja/teaching/H517/project1/");
 
 var container = svgContainer.append("g");
 
@@ -226,13 +231,64 @@ function dragged(d) {
 function dragended(d) {
   d3.select(this).classed("dragging", false);
 }
+function zoomed() {
+    svgContainer.attr("transform",
+        "translate(" + zoom.translate() + ")" +
+        "scale(" + zoom.scale() + ")"
+    );
+}
+
+function interpolateZoom (translate, scale) {
+    var self = this;
+    return d3.transition().duration(350).tween("zoom", function () {
+        var iTranslate = d3.interpolate(zoom.translate(), translate),
+            iScale = d3.interpolate(zoom.scale(), scale);
+        return function (t) {
+            zoom
+                .scale(iScale(t))
+                .translate(iTranslate(t));
+            zoomed();
+        };
+    });
+}
+
+function zoomClick() {
+    var clicked = d3.event.target,
+        direction = 1,
+        factor = 0.2,
+        target_zoom = 1,
+        center = [width / 2 , height / 2],
+        extent = zoom.scaleExtent(),
+        translate = zoom.translate(),
+        translate0 = [],
+        l = [],
+        view = {x: translate[0], y: translate[1], k: zoom.scale()};
+
+    d3.event.preventDefault();
+    direction = (this.id === 'zoom_in') ? 1 : -1;
+    target_zoom = zoom.scale() * (1 + factor * direction);
+
+    if (target_zoom < extent[0] || target_zoom > extent[1]) { return false; }
+
+    translate0 = [(center[0] - view.x) / view.k, (center[1] - view.y) / view.k];
+    view.k = target_zoom;
+    l = [translate0[0] * view.k + view.x, translate0[1] * view.k + view.y];
+
+    view.x += center[0] - l[0];
+    view.y += center[1] - l[1];
+
+    interpolateZoom([view.x, view.y], view.k);
+}
+
+d3.selectAll('button').on('click', zoomClick);
+
 
  //name of main streets
 
  var street = [{name:'CEORCE STREET',x:120,y:222,rotate:72},{name:'BREWER STREET',x:355,y:390,rotate:-43},
               {name:'RECENT STREET',x:235,y:250,rotate:60},{name:'OXFORD STREET',x:298,y:79,rotate:-10},
-              {name:'DEAN STREET',x:490,y:89,rotate:66},{name:'WORK',x:321.5,y:179,rotate:-23},
-              {name:'HOUSE',x:325,y:192,rotate:-23},{name:'Bre.',x:411,y:212,rotate:65}]
+              {name:'DEAN STREET',x:490,y:89,rotate:66},{name:'WORK',x:323,y:179,rotate:-20},
+              {name:'HOUSE',x:325,y:188,rotate:-20},{name:'brewery',x:411,y:212,rotate:65}]
 
  var workHouse = [{x:311,y:170,w:45,h:38,rotate:-25}]
 
@@ -343,7 +399,7 @@ function dragended(d) {
           .attr("height", function(d) { return d.h; })
           .attr("stroke", 'grey')
           .attr("stroke-opacity",0.8)
-          .style("fill", "#b8e186"); 
+          .style("fill", "red"); 
 
           var bre = svgContainer.append("rect")
           .data(brewery)
@@ -353,7 +409,7 @@ function dragended(d) {
           .attr("y", function(d) { return d.y; })
           .attr("width", function(d) { return d.w; })
           .attr("height", function(d) { return d.h; })
-          .style("fill", "#b2abd2");       
+          .style("fill", "yellow");       
 
 //name of streets
         svgContainer.selectAll(".place-label")
@@ -406,9 +462,12 @@ function dragended(d) {
    	});
 
 
+</script>
+</th>
 
+<td>
 
-
+<script type="text/javascript">
 
 //Draw overall chart
 
@@ -535,8 +594,7 @@ x1.domain(overall.map(function(d) { return d.age1+ "-"+ d.age2; }));
     .attr("transform", "translate(0,0)")
     .call(yAxisLeft)
   .append("text")
-  .attr("x", 10)
-    .attr("y", 15)
+    .attr("y", 6)
     .attr("dy", "-2em")
     .style("text-anchor", "end")
     .text("Deaths");
@@ -566,19 +624,6 @@ x1.domain(overall.map(function(d) { return d.age1+ "-"+ d.age2; }));
       .attr("width", x1.rangeBand() / 2)
       .attr("y", function(d) { return y1(d.female); })
     .attr("height", function(d,i,j) { return h2 - y1(d.female); }); 
-
-    var illustrator1 = [{name:"Distribution of Deaths by Sex and Age Overall",x:50,y:275}]
-
-    chart2.append("g").selectAll(".place-label")
-          .data(illustrator1)
-          .enter().append("text")
-          .attr("class", "place-label")
-          .attr("x", function(d) { return d.x; })
-          .attr("y", function(d) { return d.y; })
-       //.attr("transform", function(d) { return "translate(" + d.x+"," +d.y ")"; })
-           .attr("dy", ".35em")
-    //.text("ddddddddd");
-           .text(function(d) { return d.name; });
 
   
 
@@ -694,9 +739,13 @@ function type(d) {
 
 	}
 
+</script>
+
+</td>
 
 
-
+<td>
+<script type="text/javascript">
 	//Draw timeline
 
 	d3.csv("deathdays.txt",function(data){
@@ -768,11 +817,11 @@ function type(d) {
         	chart2.selectAll("g").remove();
 
    			chart2.selectAll(".bar").remove();
-   			 chart2.selectAll("rect").remove();
+   			chart2.selectAll("rect").remove();
    			chart2.selectAll("text.bar").remove();
    			chart2.selectAll("text").remove();
 
-
+   			console.log("success");
 
    			var l=0;
 
@@ -916,32 +965,16 @@ x1.domain(overall.map(function(d) { return d.age1+ "-"+ d.age2; }));
     .style("text-anchor", "begin")
     .text("Age");
 
-  var illustrator1 = [{name:"Distribution of Deaths by Sex and Age Overall",x:50,y:275}]
-
-    chart2.append("g").selectAll(".place-label")
-          .data(illustrator1)
-          .enter().append("text")
-          .attr("class", "place-label")
-          .attr("x", function(d) { return d.x; })
-          .attr("y", function(d) { return d.y; })
-       //.attr("transform", function(d) { return "translate(" + d.x+"," +d.y ")"; })
-           .attr("dy", ".35em")
-    //.text("ddddddddd");
-           .text(function(d) { return d.name; });
-
 
   chart2.append("g")
     .attr("class", "y axis axisLeft")
     .attr("transform", "translate(0,0)")
     .call(yAxisLeft)
   .append("text")
-    .attr("x", 10)
-    .attr("y", 15)
+    .attr("y", 6)
     .attr("dy", "-2em")
     .style("text-anchor", "end")
     .text("Deaths");
-
-    
 
 
   
@@ -1088,72 +1121,7 @@ function type(d) {
 		.attr("class", "y axis")
 		.call(yAxis)
 		.append("text")
-    .attr("x", -25)
-          .attr("y", -2)
 		.text("Deaths");
-
-  //pump
-  chart1.append("rect")
-    .attr("x", 0)
-    .attr("y", 350)
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", "black")
-    .style("stroke","grey")
-    .style("stroke-width",0.8);
-
-  
-
-  //workhouse
-  chart1.append("rect")
-    .attr("x", 0)
-    .attr("y", 370)
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", "#b8e186")
-    .style("stroke-width",0.8);
-
-  //brewery 
-  chart1.append("rect")
-    .attr("x", 0)
-    .attr("y", 390)
-    .attr("width", 10)
-    .attr("height", 10)
-    .style("fill", "#c2a5cf")
-    .style("stroke-width",0.8); 
-
-    var label = [{x:5,y:415,color:"white"},{x:120,y:355,color:"steelblue"},{x:120,y:375,color:"orange"},
-                  {x:200,y:355,color:"#b2182b"},{x:200,y:375,color:"#ef8a62"},{x:200,y:395,color:"#fddbc7"},
-                  {x:200,y:415,color:"#d1e5f0"},{x:200,y:435,color:"#67a9cf"},{x:200,y:455,color:"#2166ac"},]
-
-    chart1.selectAll("dot")  
-        .data(label)     
-    .enter().append("ellipse")                 
-        .attr("cx", function(d) { return d.x; })     
-        .attr("cy", function(d) { return d.y; })
-        .attr("rx", 5) 
-        .attr("ry", 5)
-        .style("fill", function(d) { return d.color; }) 
-        .style("stroke","grey")
-        .style("stroke-width",1); 
-
-    var illustrator = [{name:'Pump',x:15,y:355},{name:'Work House',x:15,y:375},
-              {name:'Brewery',x:15,y:395},{name:'Deaths location',x:15,y:415},
-              {name:'Male',x:130,y:355},{name:'Female',x:130,y:375},
-              {name:'0-10',x:210,y:355},{name:'11-20',x:210,y:375},{name:'21-40',x:210,y:395},
-              {name:'41-60',x:210,y:415},{name:'61-80',x:210,y:435},{name:'>80',x:210,y:455}
-              ,{name:'Original Map:',x:0,y:330},{name:'Gender:',x:115,y:330},{name:'Age:',x:195,y:330},{name:'The number of deaths per day',x:80,y:280}]
-
-  chart1.selectAll(".place-label")
-          .data(illustrator)
-          .enter().append("text")
-          .attr("class", "place-label")
-          .attr("x", function(d) { return d.x; })
-          .attr("y", function(d) { return d.y; })
-       //.attr("transform", function(d) { return "translate(" + d.x+"," +d.y ")"; })
-           .attr("dy", ".35em")
-    //.text("ddddddddd");
-           .text(function(d) { return d.name; });
 
 
 	
@@ -1173,79 +1141,33 @@ function type(d) {
 
 
 
-function zoomed() {
-    svgContainer.attr("transform",
-        "translate(" + zoom.translate() + ")" +
-        "scale(" + zoom.scale() + ")"
-    );
-}
 
-function interpolateZoom (translate, scale) {
-    var self = this;
-    return d3.transition().duration(350).tween("zoom", function () {
-        var iTranslate = d3.interpolate(zoom.translate(), translate),
-            iScale = d3.interpolate(zoom.scale(), scale);
-        return function (t) {
-            zoom
-                .scale(iScale(t))
-                .translate(iTranslate(t));
-            zoomed();
-        };
-    });
-}
 
-function zoomClick() {
-    var clicked = d3.event.target,
-        direction = 1,
-        factor = 0.2,
-        target_zoom = 1,
-        center = [width / 2 + 200, height / 2-100],
-        extent = zoom.scaleExtent(),
-        translate = zoom.translate(),
-        translate0 = [],
-        l = [],
-        view = {x: translate[0], y: translate[1], k: zoom.scale()};
 
-    d3.event.preventDefault();
-    direction = (this.id === 'zoom_in') ? 1 : -1;
-    target_zoom = zoom.scale() * (1 + factor * direction);
-
-    if (target_zoom < extent[0] || target_zoom > extent[1]) { return false; }
-
-    translate0 = [(center[0] - view.x) / view.k, (center[1] - view.y) / view.k];
-    view.k = target_zoom;
-    l = [translate0[0] * view.k + view.x, translate0[1] * view.k + view.y];
-
-    view.x += center[0] - l[0];
-    view.y += center[1] - l[1];
-
-    interpolateZoom([view.x, view.y], view.k);
-}
-
-d3.selectAll('button').on('click', zoomClick);
 
 
 	//Draw the timeline graph
 
 
-        </script>
+  </script>
+</td>
+</tr></table>
+</section>
+
+
         <section id="next-section" class="section light-bg">
-        <h4>Documentation&YouTube Video:</h4>
-        <h6><a href="http://zhuangke16.github.io/H517-Project1-Documentation" target="_blank" title="">http://zhuangke16.github.io/H517-Project1-Documentation </a></br>
-        <a href="http://zhuangke16.github.io/H517-Project1-Documentation" target="_blank" title="">http://zhuangke16.github.io/H517-Project1-Documentation</a></h6></br>
-
-        
-
         </br></br></br><h4>Materials References</h4>
-				<p style="text-align:justify; text-justify:inter-ideograph;"><h5>1. Documents referenced:</h5><h6><a href="http://bl.ocks.org/d3noob/a22c42db65eb00d4e369" target="_blank" title="">Simple d3.js tooltips</a></br>
+				<p style="text-align:justify; text-justify:inter-ideograph;"><h5>1. Packages and documents supported:</h5><a href="http://wiki.etc.cmu.edu/unity3d/index.php/Microsoft_Kinect_-_Microsoft_SDK" target="_blank" title="">Kinney, P, (2013). Kinect Wrapper Package for Unity3D.</a></br>
 
-				<a href="https://d3js.org/" target="_blank" title="">D3: Data-Driven Documents</a></br></h6>
+				<a href="https://msdn.microsoft.com/en-us/library/dn758675.aspx" target="_blank" title="">Microsoft Documentation, (2017). Kinect for Windows v2 Windows Runtime API Reference.</a></br>
 
+				<a href="https://msdn.microsoft.com/en-us/library/dn785529.aspx" target="_blank" title="">Microsoft Documentation, (2017). Visual Gesture Builder: Overview.</a></br>
 
-			</br><h5>2. Data Resources:</h5>
-			<h6><a href="http://vis.ninja/teaching/H517/project1/" target="_blank" title="">H517 Visualization Design, Analysis and Evaluation - Project 1</a></br>
-			<a href="https://en.wikipedia.org/wiki/1854_Broad_Street_cholera_outbreak" target="_blank" title="">Dr. John Snow's map of London's 1854 cholera epidemic</a></br>
+			</br><h5>2. The Avatar and scenario asset used:</h5>
+			<a href="https://www.assetstore.unity3d.com/cn/#!/content/18708" target="_blank" title="">Kinect v2 Examples with MS-SDK (Avatar)</a></br>
+			<a href="https://www.assetstore.unity3d.com/cn/#!/content/18392" target="_blank" title="">Japanese Classroom Set</a></br>
+			<a href="https://www.assetstore.unity3d.com/cn/#!/content/35086" target="_blank" title="">Company Office</a></br>
 			</br></p>
+		</section>
     </body>
-  </section>
 </html>
