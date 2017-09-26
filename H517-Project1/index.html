@@ -105,7 +105,7 @@ div.tooltip {
   
   <script type="text/javascript">
 
-    var width  = 550;
+    var width  = 520;
     var height = 580;
     var w = 100;
     var h = 100;
@@ -130,11 +130,11 @@ div.tooltip {
     .on("dragend", dragended);
 
   var	margin = {top: 30, right: 20, bottom: 30, left: 50},
-	w1 = 400 - margin.left - margin.right,
+	w1 = 370 - margin.left - margin.right,
 	h1 = 300 - margin.top - margin.bottom;
 
 var margin1 = {top: 80, right: 80, bottom: 80, left: 80},
-    w2 = 470 - margin1.left - margin1.right,
+    w2 = 450 - margin1.left - margin1.right,
     h2 = 400 - margin1.top - margin1.bottom;
 
 var zoom = d3.behavior.zoom().scaleExtent([1, 10]).on("zoom", zoomed);
@@ -567,7 +567,7 @@ x1.domain(overall.map(function(d) { return d.age1+ "-"+ d.age2; }));
       .attr("y", function(d) { return y1(d.female); })
     .attr("height", function(d,i,j) { return h2 - y1(d.female); }); 
 
-    var illustrator1 = [{name:"Distribution of Deaths by Sex and Age Overall",x:50,y:275}]
+    var illustrator1 = [{name:"Distribution of Deaths by Sex and Age Overall",x:30,y:275}]
 
     chart2.append("g").selectAll(".place-label")
           .data(illustrator1)
@@ -1142,7 +1142,7 @@ function type(d) {
               {name:'Male',x:130,y:355},{name:'Female',x:130,y:375},
               {name:'0-10',x:210,y:355},{name:'11-20',x:210,y:375},{name:'21-40',x:210,y:395},
               {name:'41-60',x:210,y:415},{name:'61-80',x:210,y:435},{name:'>80',x:210,y:455}
-              ,{name:'Original Map:',x:0,y:330},{name:'Gender:',x:115,y:330},{name:'Age:',x:195,y:330},{name:'The number of deaths per day',x:80,y:280}]
+              ,{name:'Original Map:',x:0,y:330},{name:'Gender:',x:115,y:330},{name:'Age:',x:195,y:330},{name:'The number of deaths per day',x:70,y:280}]
 
   chart1.selectAll(".place-label")
           .data(illustrator)
