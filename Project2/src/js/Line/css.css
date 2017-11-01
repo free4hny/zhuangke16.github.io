@@ -1,0 +1,10 @@
+.line_i {
+    fill: none;
+    stroke: #998ec3 !important;
+    stroke-width: 1.5px !important;
+}
+.line_e {
+    fill: none;
+    stroke: #f1a340 !important;
+    stroke-width: 1.5px !important;
+}

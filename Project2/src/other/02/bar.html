@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Title</title>
+	<script src="https://d3js.org/d3.v4.min.js"></script>
+	<script src="https://d3js.org/d3-selection-multi.v1.min.js"></script>
+	<style>
+		body{
+			font-family:Arial !important;
+		}
+	</style>
+</head>
+<body>
+<svg id="svg" width="500" height="600"></svg>
+</body>
+</html>
+<script>
+	var data=[
+		{RefId:"ND00001",start:1,end:1000},
+		{RefId:"ND00001",start:150,end:1150}
+	];
+	var svg = d3.select("#svg");
+
+	var margin = {
+		left:100,
+		right:100,
+		top:100,
+		bottom:100
+	};
+
+	var width= +svg.attr("width") - margin.left - margin.right;
+	var height = +svg.attr("height") - margin.top - margin.bottom;
+
+
+
+</script>
